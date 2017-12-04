@@ -1,0 +1,15 @@
+ifneq ($(VERSION), 2)
+	KVersion := $(VERSION).$(PATCHLEVEL)
+else
+	KVersion := $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)
+endif
+
+EC_E1000_OBJ := \
+	e1000_main-$(KVersion)-ethercat.o \
+	e1000_hw-$(KVersion)-ethercat.o \
+	e1000_ethtool-$(KVersion)-ethercat.o \
+	e1000_param-$(KVersion)-ethercat.o
+obj-m += ec_e1000.o
+ec_e1000-objs := $(EC_E1000_OBJ)
+CFLAGS_e1000_main-$(KVersion)-ethercat.o = -DREV=$(REV)
+

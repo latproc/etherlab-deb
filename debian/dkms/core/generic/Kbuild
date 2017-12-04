@@ -1,0 +1,5 @@
+EC_GENERIC_OBJ := generic.o
+obj-m += ec_generic.o
+ec_generic-objs := $(EC_GENERIC_OBJ)
+CFLAGS_$(EC_GENERIC_OBJ) = -DREV=$(REV)
+

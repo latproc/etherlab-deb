@@ -1,0 +1,11 @@
+ifneq ($(VERSION), 2)
+	KVersion := $(VERSION).$(PATCHLEVEL)
+else
+	KVersion := $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)
+endif
+
+EC_8139TOO_OBJ := 8139too-$(KVersion)-ethercat.o
+obj-m += ec_8139too.o
+ec_8139too-objs := $(EC_8139TOO_OBJ)
+CFLAGS_$(EC_8139TOO_OBJ) = -DREV=$(REV)
+

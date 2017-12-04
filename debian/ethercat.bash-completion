@@ -1,0 +1,132 @@
+# bash completion for the ethercat tool
+
+shopt -s extglob
+
+
+_ethercat_cmd()
+{
+    "$ethercat" "$@" 2>/dev/null
+}
+
+# list all available commands
+_ethercat_commands()
+{
+    local commands
+        
+    commands="$(_ethercat_cmd -h | awk  '/^  [a-z]+/ {print $1}')" || commands=""
+    COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W '$commands' -- "$cur"))
+}
+
+
+# -t datatype option
+_ethercat_opt_datatypes()
+{
+    local datatypes="bool int8 int16 int32 int64 uint8 uint16 uint32 uint64 float double string octet_string unicode_string sm8 sm16 sm32 sm64"
+    if [[ "$prev" == "-t" ]]; then
+        COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W '$datatypes' -- "$cur"))
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+# slave addressing by position or alias
+_ethercat_opt_slaves()
+{
+    if _ethercat_opt_datatypes; then
+        return 0
+    fi
+    local pos="$(_ethercat_cmd slaves | awk '{print $1}')"
+    local alias="$(_ethercat_cmd slaves | awk '{print $2}' | awk -F: '{print $1}')"
+    if [[ "$prev" == "-p" ]]; then
+        COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W '$pos' -- "$cur"))
+        return 0
+    elif [[ "$prev" == "-a" ]]; then
+        COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W '$alias' -- "$cur"))
+        return 0
+    else
+        return 1       
+    fi
+}
+
+
+_ethercat_cmd_slaves()
+{
+    if _ethercat_opt_slaves; then
+        return
+    else
+        COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W '-p -a -v' -- "$cur"))
+    fi
+}
+
+_ethercat_cmd_reg_read()
+{
+    _ethercat_cmd_slaves
+}
+
+_ethercat_cmd_reg_write()
+{
+    _ethercat_cmd_slaves
+}
+
+
+_ethercat_cmd_reg_upload()
+{
+    _ethercat_cmd_slaves
+}
+
+_ethercat_cmd_reg_download()
+{
+    _ethercat_cmd_slaves
+}
+
+
+_ethercat()
+{
+    local cur prev cmd cmd_index opts i
+    
+    local ethercat="$1"
+    COMPREPLY=()
+    cur="$2"
+    prev="$3"
+
+    # searching for the command
+    # (first non-option argument that doesn't follow a global option that
+    #  receives an argument)
+    for ((i=1; $i<=$COMP_CWORD; i++)); do
+	if [[ ${COMP_WORDS[i]} != -* ]]; then
+	    if [[ ${COMP_WORDS[i-1]} != @($global_args) ]]; then
+		cmd="${COMP_WORDS[i]}"
+		cmd_index=$i
+		break
+	    fi
+	fi
+    done
+
+    if [ -z "$cmd" ] || [ $COMP_CWORD -eq $i ]; then
+	    _ethercat_commands
+	    return
+    fi
+
+    # try to generate completion candidates for whatever command the user typed
+    local help
+    if _ethercat_command_specific; then
+    	return
+    fi
+
+}
+
+_ethercat_command_specific()
+{
+    if [ "$(type -t "_ethercat_cmd_$cmd")" = function ]; then
+    	"_ethercat_cmd_$cmd"
+    	return 0
+    fi
+
+    return 0
+}
+
+# register completion script within bash
+complete -o bashdefault -o default -F _ethercat ethercat || complete -o default -F _ethercat ethercat
+

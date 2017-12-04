@@ -1,0 +1,125 @@
+Index: Etherlab/script/init.d/ethercat.in
+===================================================================
+--- Etherlab.orig/script/init.d/ethercat.in	2013-07-19 15:17:42.769066448 +0200
++++ Etherlab/script/init.d/ethercat.in	2013-07-19 15:18:23.771107445 +0200
+@@ -70,6 +70,39 @@
+ 
+ #------------------------------------------------------------------------------
+ 
++increase_net_thread_priority() {
++	local PRIO=80
++	local NETDEVNAME="$1"
++
++	# match something like irq/44-$NETDEVNAME.
++	# We may have multiple threads for a single NIC. This really depends on the driver
++	# and the NIC.
++	# TODO This grep is rather broad and works for 3.0-rt. Different kernels might
++	# use different thread[names] and we will have to check the kernel version.
++	# XXX If awk happens to be mawk, we can't use posix character classes, because
++	# they are not supported, even though the manual states that they are. LP 69724
++	irqpid=$(ps -A | awk "/irq\/[0-9]+-${NETDEVNAME}/ { print \$1 }" | xargs --no-run-if-empty)
++	for pid in $irqpid; do
++		chrt --fifo --pid ${PRIO} ${pid}
++	done
++}
++
++#------------------------------------------------------------------------------
++
++set_net_coalesce_options() {
++	local NETDEVNAME="$1"
++
++	# interrupt throttling et al should be set through ethtool on newer kernels. Some
++	# drivers (igb) no longer support the required module parameters.
++	ethtool --coalesce $NETDEVNAME adaptive-rx off adaptive-tx off \
++		rx-usecs 0 rx-frames 0 rx-usecs-irq 0 rx-frames-irq 0 \
++		tx-usecs 0 tx-frames 0 tx-usecs-irq 0 tx-frames-irq 0 \
++		pkt-rate-low 0 pkt-rate-high 0
++}
++
++
++#------------------------------------------------------------------------------
++
+ exit_success() {
+     if [ -r /etc/rc.status ]; then
+         rc_reset
+@@ -90,6 +123,7 @@
+         rc_exit
+     else
+         echo " failed"
++        echo $1
+         exit 1
+     fi
+ }
+@@ -124,13 +158,38 @@
+     elif echo ${1} | grep -qE '^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$'; then
+         MAC=${1}
+     else
+-        echo Invalid MAC address \"${1}\" in ${ETHERCAT_CONFIG}
+-        exit_fail
++        exit_fail "ERROR: Invalid MAC address \"${1}\" in ${ETHERCAT_CONFIG}"
+     fi 
+ }
+ 
+ #------------------------------------------------------------------------------
+ 
++verify_interface()
++{
++	local ethmac=$1
++
++	if [ -z "$ethmac" ]; then
++ 		exit_fail "ERROR: Missing parameter for verify_interface()!"
++	fi
++
++	ethdev=$(ifconfig -a | awk "/HWaddr $ethmac/ { print \$1 }")
++	if lsmod | grep -q ec_master; then
++		exit_fail "ERROR: Etherlab is already running!"
++	fi
++	if [ x$ethdev = x ]; then
++		exit_fail "ERROR: Could not find eth-entry for mac $ethmac!"
++	fi
++	if ip addr show dev $ethdev scope global > /dev/null 2>&1; then
++		local inetAddr=$(ip addr show dev $ethdev scope global | sed -e's/^.*inet \([^ ]*\)\/.*$/\1/;t;d')
++		if [ x"$inetAddr" != x"" ]; then
++			exit_fail "ERROR: The interface $eth seems to be occupied!"
++		fi
++	fi
++	LAST_VERIFIED_NETDEVNAME=$ethdev
++}
++
++#------------------------------------------------------------------------------
++
+ if [ -r /etc/rc.status ]; then
+     . /etc/rc.status
+     rc_reset
+@@ -157,7 +216,10 @@
+ 
+         parse_mac_address ${DEVICE}
+         DEVICES=${DEVICES}${MAC}
+-        
++        verify_interface ${MAC}
++        increase_net_thread_priority ${LAST_VERIFIED_NETDEVNAME}
++        set_net_coalesce_options ${LAST_VERIFIED_NETDEVNAME}
++
+         parse_mac_address ${BACKUP}
+         BACKUPS=${BACKUPS}${MAC}
+ 
+@@ -171,6 +233,7 @@
+     fi
+ 
+     # check for modules to replace
++	reconfigure_interface=false
+     for MODULE in ${DEVICE_MODULES}; do
+         ECMODULE=ec_${MODULE}
+         if ! ${MODINFO} ${ECMODULE} > /dev/null; then
+@@ -197,6 +260,11 @@
+ stop)
+     echo -n "Shutting down EtherCAT master @VERSION@ "
+ 
++    # if no module is loaded, exit right away
++    if ! lsmod | grep -qE "^ec_"; then
++        exit_success
++    fi
++
+     # unload EtherCAT device modules
+     for MODULE in ${DEVICE_MODULES} master; do
+         ECMODULE=ec_${MODULE}

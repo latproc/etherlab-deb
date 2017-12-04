@@ -1,0 +1,18 @@
+ifneq ($(VERSION), 2)
+	KVersion := $(VERSION).$(PATCHLEVEL)
+else
+	KVersion := $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)
+endif
+
+EC_E1000E_OBJ := \
+	82571-$(KVersion)-ethercat.o \
+	es2lan-$(KVersion)-ethercat.o \
+	ethtool-$(KVersion)-ethercat.o \
+	ich8lan-$(KVersion)-ethercat.o \
+	lib-$(KVersion)-ethercat.o \
+	netdev-$(KVersion)-ethercat.o \
+	param-$(KVersion)-ethercat.o \
+	phy-$(KVersion)-ethercat.o
+obj-m += ec_e1000e.o
+ec_e1000e-objs := $(EC_E1000E_OBJ)
+CFLAGS_netdev-$(KVersion)-ethercat.o = -DREV=$(REV)

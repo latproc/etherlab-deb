@@ -1,0 +1,5 @@
+usr/include/* opt/etherlab-devel/include/
+lib/*.h opt/etherlab-devel/include/private/lib/
+usr/lib/lib*.so opt/etherlab-devel/lib/
+usr/lib/lib*.a opt/etherlab-devel/lib/
+usr/lib/*.la opt/etherlab-devel/lib/

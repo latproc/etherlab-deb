@@ -1,0 +1,10 @@
+Template: shared/etherlab-nic-to-use
+Type: select
+Choices: ${eth-devices}
+Description: Which network interface card should Etherlab use?
+
+Template: shared/etherlab-driver-to-use
+Type: select
+Choices: generic, 8139too, e1000, r8169, e1000e
+Default: generic
+Description: Which driver should Etherlab use for the card?

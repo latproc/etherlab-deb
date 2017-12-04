@@ -1,0 +1,115 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          ethercat-config
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Setup configuration file for Etherlab
+# Description:       This script must run before the etherlab start
+#                    script. It will check which NICs are in the system
+#                    and create a suitable etherlab configuration file.
+#                    
+### END INIT INFO
+
+# Author: Komax AG <info@komaxgroup.com>
+# Do NOT "set -e"
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="Create an ethercat configuration file"
+NAME=ethercat-config
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   2 if daemon could not be started
+	
+	# If we find any network devices named ecatN (N >= 0), the configuration file
+	# of etherlab will be ignored. Instead, we set the variables from the config
+	# file manually below.
+	driverPrefix=ecat
+	tmpDriverFile=/tmp/etherlab-drivers-to-load
+	tmpMasterFile=/tmp/ethercat
+	ecatSysconfig=/etc/sysconfig/ethercat
+	rm -f $tmpDriverFile $tmpMasterFile
+	ecatDevCount=$(find /sys/class/net/ -name ${driverPrefix}\* -type l -exec basename {} \; | wc -l)
+	if [ ${ecatDevCount} -gt 0 ]; then
+		ecatDevs=$(find /sys/class/net/ -name ${driverPrefix}\* -type l -exec basename {} \; | sort)
+		idx=0
+		log_daemon_msg "$NAME: Found devices with prefix=${driverPrefix}, OVERWRITING etherlab configuration file"
+		for dev in ${ecatDevs} ; do
+			echo "MASTER${idx}_DEVICE=$(cat /sys/class/net/${dev}/address)" >> $tmpMasterFile
+			idx=$((${idx} + 1))
+
+			# find the name of the driver in use. Then check if we have a patched driver
+			# available. If not, fall back to generic.
+			# NOTE: Etherlab expects e1000e when ec_e1000e should be loaded!
+			# XXX Use generic as default for now because using a patched driver brings
+			# its own set of problems when it comes to network configuration
+			driver=$(basename $(readlink /sys/class/net/${dev}/device/driver/module))
+			echo generic >> $tmpDriverFile
+			#if modinfo ec_$driver > /dev/null 2>&1; then
+			#	echo $driver >> $tmpDriverFile
+			#else
+			#	echo generic >> $tmpDriverFile
+			#fi
+		done
+
+		install -D --mode=644 --owner=root --group=root $tmpMasterFile $ecatSysconfig
+		echo DEVICE_MODULES=\"$(sort $tmpDriverFile | uniq | xargs)\" >> $ecatSysconfig
+	else
+		log_daemon_msg "$NAME: No relevant ethernet devices found, doing nothing"
+	fi
+}
+
+case "$1" in
+  start)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+	do_start
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  stop)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+	[ "$VERBOSE" != no ] && log_end_msg 0
+	;;
+  status)
+       status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+       ;;
+  restart|force-reload)
+	#
+	# If the "reload" option is implemented then remove the
+	# 'force-reload' alias
+	#
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_start
+	case "$?" in
+		0) log_end_msg 0 ;;
+		1) log_end_msg 1 ;; # Old process is still running
+		*) log_end_msg 1 ;; # Failed to start
+	esac
+	;;
+  *)
+	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	exit 3
+	;;
+esac
+
+:

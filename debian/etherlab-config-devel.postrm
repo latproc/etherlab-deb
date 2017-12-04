@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+if [ "$1" = "purge" -a -e /usr/share/debconf/confmodule ]; then
+	# Source debconf library.
+	. /usr/share/debconf/confmodule
+	# purge information. Debconf keeps track of who own db-entries, and
+	# there can be multiple owners. So purge should be ok
+	db_purge
+fi
+
+#DEBHELPER#

@@ -1,0 +1,383 @@
+etherlab-devel (20141111+2640-1) precise; urgency=low
+
+  * FoE: retry on timeouts
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Tue, 11 Nov 2014 16:34:21 +0100
+
+etherlab-devel (20131125+2638-1) precise; urgency=low
+
+  * Master FSM: prevent unnessessary repetition of rescans
+  * Mailbox: restart repeat-fetch-fsm when sending
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Mon, 25 Nov 2013 10:55:36 +0100
+
+etherlab-devel (20131112+2636-1) precise; urgency=low
+
+  * VM_RESERVED flag replaced with VM_IO for Linux >= 3.10.10
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Tue, 12 Nov 2013 16:06:42 +0100
+
+etherlab-devel (20131025+2635-1) precise; urgency=low
+
+  * Fixed rescan wait so that it really waits until all slaves are ready
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Fri, 25 Oct 2013 08:45:32 +0200
+
+etherlab-devel (20130827+2632-1) precise; urgency=low
+
+  * Rescan 'wait' waits until slaves are ready
+  * Reduced time to wait before fetching dictionaries from 3s to 1s
+  * Cancel only very old (t > 5 secs) pending requests in idle state
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Wed, 28 Aug 2013 08:41:53 +0200
+
+etherlab-devel (20130805+2628-1) precise; urgency=low
+
+  * Update etherlab script to use ethtool to set network irq
+    throttling (coalesce) options.
+  * Clean x-bit in etherlabs master.c.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Mon, 05 Aug 2013 11:11:20 +0200
+
+etherlab-devel (20130719+2627-1) precise; urgency=low
+
+  * Fixed blocking sdo upload/download when slave is not ready
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Fri, 19 Jul 2013 16:32:39 +0200
+
+etherlab-devel (20130411+2626-1) precise; urgency=low
+
+  * Fixed crash during dictionary fetch
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Thu, 11 Apr 2013 13:36:06 +0200
+
+etherlab-devel (20121031+2516-1) precise; urgency=low
+
+  * increment send flow control after sending 
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Wed, 31 Oct 2012 16:29:26 +0100
+
+etherlab-devel (20121031+2515-1) precise; urgency=low
+
+  * resync slave fsm send mbox flow control
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Wed, 31 Oct 2012 13:41:46 +0100
+
+etherlab-devel (20121025+2514-1) precise; urgency=low
+
+  * [mt] resync slave fsm mbox receive flow control
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Thu, 25 Oct 2012 11:09:42 +0200
+
+etherlab-devel (20120927+2510-1) precise; urgency=low
+
+  * [mt] merged upstream changes
+  * [mt,bla] Fixed handling datagram timeouts by using flowcontrol on mailbox transfers
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Tue, 23 Oct 2012 11:00:32 +0200
+
+etherlab-devel (20120605+2453-1) precise; urgency=low
+
+  * [mt] Fixed race between OP and RT thread (gcc barrier before update dg state)
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Wed, 06 Jun 2012 10:56:07 +0200
+
+etherlab-devel (20120402+2337-2ubuntu1) precise; urgency=low
+
+  * [mac] Call awk in etherlab initscript with parameters that
+    work for mawk and gawk alike, e.g. no posix character classes.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Fri, 04 May 2012 09:44:29 +0200
+
+etherlab-devel (20120402+2337-2) precise; urgency=low
+
+  * [mac] Create group realtime if it does not yet exist.
+  * [mac] Reload udev rules so udev can pick up the gid of the newly 
+    created group.
+  * [mac] Try to start/stop EtherCATController et al. from etherlabs
+    maintainer scripts. This should allow upgrading etherlab without
+    manual user intervention. This is only done if the script thinks
+    it runs on a machine pc (if /etc/sv/kxusr/supervise/ok exists).
+  * [mac] Call ldconfig.real in postinst. Because we install libethercat
+    into a non-standard directory, ld.so will not automatically detect it
+    and an up-to-date cache is required. But ldconfig defers updating the
+    library cache until much later when ECC is already started, which is
+    too late in our case.
+  * [mac] Remove intel interrupt latency settings from etherlab. This is
+    now provided by rtcontroller-sysconfig and preinstalled in the machine
+    pc image.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Wed, 02 May 2012 12:53:14 +0200
+
+etherlab-devel (20120402+2337-1) lucid; urgency=low
+
+  * [pc] Properly discard active sdo transfer in slave cleanup
+  * [bla] SDO communication: No error if up- or downloading emtpy strings (no expedited transfer if data_size is 0) 
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Tue, 03 Apr 2012 11:34:29 +0200
+
+etherlab-devel (20120213+2330-2) precise; urgency=low
+
+  * No-op update to allow package to be included into komax repository
+    for 12.04. This is only a rebuild on 12.04 with no further changes.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Mon, 02 Apr 2012 11:17:01 +0200
+
+etherlab-devel (20120213+2330-1) lucid; urgency=low
+
+  * [bla] Fixed EoE config variables and byte order of ip_config_eoe command
+  * [pc] Handle ESI EEPROM interface assignment (Master allows slave to access its ESI)
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Fri, 24 Feb 2012 08:59:09 +0100
+
+etherlab-devel (20120118+2327-1) lucid; urgency=low
+
+  * [bla] EoE bug fixes; Set IP parameter request
+  * [mt] Merged upstream changes
+  * [mt] Common handling for slave requests
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Thu, 26 Jan 2012 13:55:56 +0100
+
+etherlab-devel (20120105+2135-4) lucid; urgency=low
+
+  * [mac] Change default driver back to generic. See last change
+    for reasons.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Thu, 19 Jan 2012 17:06:15 +0100
+
+etherlab-devel (20120105+2135-3) lucid; urgency=low
+
+  * [mac] Drop reloading of network configuration again as it
+    is not required for now. ifup/ifdown does much more than just
+    set the ip again and so gets into all kind of nasty deadlocks
+    when etherlab is restarted.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Thu, 19 Jan 2012 13:55:51 +0100
+
+etherlab-devel (20120105+2135-2) lucid; urgency=low
+
+  * [mac] Reload network configuration for interface topwin if
+    it is detected. This is required because the configuration can
+    be lost when a patched driver is loaded.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Mon, 09 Jan 2012 09:33:48 +0100
+
+etherlab-devel (20120105+2135-1) lucid; urgency=low
+
+  * [mac] Add patched e1000e driver for kernel 3.0.
+  * [mac] Add a separate start script with the sole purpose of setting up a
+    config file for etherlab BEFORE etherlab starts.
+  * [mac] Remove dkms autoinstall directive from all etherlab dkms modules.
+    The package compiles the modules itself on first installation. To handle
+    new kernel installs, a custom hook script is installed into /etc/kernel/.
+  * [mac] Refactor deb: Drop support for multiple parallel installations
+    of etherlab.
+  * [mac] Refactor deb: Avoid writing entire debhelper files from within
+    scripts. Most debian package files are now just templates with a few 
+    fields replaced by 'sed'.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Thu, 05 Jan 2012 15:07:00 +0100
+
+etherlab-devel (20111209+2129-1) lucid; urgency=low
+
+  * [pc] fixed sii_write (retry on timeout) 
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Mon, 12 Dec 2011 07:52:36 +0100
+
+etherlab-devel (20110907+2127-3) lucid; urgency=low
+
+  * [mac] Fix update of initial ramdisk by just doing it in the
+    post installation script for EVERY installed kernel.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Tue, 06 Dec 2011 14:05:21 +0100
+
+etherlab-devel (20110907+2127-2) lucid; urgency=low
+
+  * [mac] Detect and use 'ecatX' interfaces automatically without configuration.
+  * [mac] Boost priority of irq threads of all used interfaces in case of 
+    generic driver. Also increase priority of all interrupt handler sharing
+    the IRQ with Etherlabs interface card.
+  * [mac] Make debconf aware of the fact that ecatX overrides the configuration
+    and write an according text.
+  * [mac] Do not execute init scripts stop action if no ec_ modules are loaded.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Fri, 18 Nov 2011 10:23:32 +0100
+
+etherlab-devel (20110907+2127-1) lucid; urgency=low
+
+  * [mac] Disable interrupt throttling for e1000 and e1000e.
+  * [mac] Tell dkms to update initramfs via dkms.conf.
+  * [mt] Bus topology algorithm fixed if there is a bus terminal that 
+    keeps the port open.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Wed, 07 Sep 2011 13:30:36 +0200
+
+etherlab-devel (20110826+2124-1) lucid; urgency=low
+
+  * [bla] Fixed handling if EoE packet is received instead of the expected packet
+  * [mt,bla] disabled slave mbox request handling while configuring the slave
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Fri, 26 Aug 2011 13:13:15 +0200
+
+etherlab-devel (20110824+2116-1) lucid; urgency=low
+
+  * [mt] rescan command with "wait" option fixed
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Wed, 24 Aug 2011 16:17:17 +0200
+
+etherlab-devel (20110824+2115-1) lucid; urgency=low
+
+  * [mt] rescan command with "wait" option
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Wed, 24 Aug 2011 11:08:55 +0200
+
+etherlab-devel (20110823+2113-1) lucid; urgency=low
+
+  * [mt] Run EoE concurrently with the other mailbox protocols (CoE, FoE, SoE)
+  * [mt] Enable fast EoE (try fetch mbox content)
+  * [mt] Fixed blocked scanning bug
+  * [mt] Ignore rescan request while scanning
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Tue, 23 Aug 2011 08:21:19 +0200
+
+etherlab-devel (20110817+2052-1) lucid; urgency=low
+
+  * Enable mailbox requests (SDO, FoE, SoE) after fetching the SDO dictionary. 
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Wed, 17 Aug 2011 10:21:23 +0200
+
+etherlab-devel (20110711+2051-2) lucid; urgency=low
+
+  * Remove BUILD_EXCLUSIVE directive for etherlab core package
+    to allow compilation on 3.0 kernels.
+  * TODO: Python script for patched driver kernel modules is not
+    yet prepared for 3.0 kernels.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Wed, 27 Jul 2011 15:24:20 +0200
+
+etherlab-devel (20110711+2051-1) lucid; urgency=low
+
+  * [bla] EoE bugfix
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Tue, 12 Jul 2011 14:33:26 +0200
+
+etherlab-devel (20110629+2049-1) lucid; urgency=low
+
+  * [bla] Increase the performance of mailbox (SDO/FoE/SoE) transfers 
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Wed, 29 Jun 2011 17:33:33 +0200
+
+etherlab-devel (20110608+12222-1) lucid; urgency=low
+
+  * fixed bug in mailbox state check
+
+ -- Martin Troxler <ch1010277@ch10dd007.komax.org>  Thu, 09 Jun 2011 09:43:35 +0200
+
+etherlab-devel (20110331+2046-1) lucid; urgency=low
+
+  * fixed kernel oops bug in ec_fsm_coe_down_response
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Thu, 31 Mar 2011 14:48:12 +0200
+
+etherlab-devel (20110314+2045-2) lucid; urgency=low
+
+  * Update scripts to not require network devices to be called ethN.
+  * Enable r8169 ethercat driver.
+  * debconf honors the settings from /etc/sysconfig/ethercat for driver and device.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Mon, 15 Mar 2011 13:23:46 +0100
+
+etherlab-devel (20110314+2045-1) lucid; urgency=low
+
+  * [mt] Reduced frame size when sending to mailbox
+  * [mt] Merged changes from sourceforge
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Tue, 15 Mar 2011 12:30:02 +0100
+
+etherlab-devel (20110224+2034-1) lucid; urgency=low
+
+  * [bla] Fixed segmented sdo dictionary upload (only first segment contains list type) 
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Thu, 24 Feb 2011 10:47:45 +0100
+
+etherlab-devel (20110117+2033-1) lucid; urgency=low
+
+  * Lock io_mutex when unqueueing datagrams; unqueue datagrams from send-receive queue.
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Mon, 17 Jan 2011 11:09:46 +0100
+
+etherlab-devel (20110114+2032-1) lucid; urgency=low
+
+  * Datagram queue race fixed (separate fsm_queue list_head)
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Fri, 14 Jan 2011 12:26:49 +0100
+
+etherlab-devel (20110106+2029-1) lucid; urgency=low
+
+  * [lm] properly deactivate slaves if there is no eoe slave
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Thu, 06 Jan 2011 17:45:21 +0100
+
+etherlab-devel (20110106+2027-1) lucid; urgency=low
+
+  * [mt] always use rt_mutex on kernels >= 2.6.24
+  * [mt] e1000 on 2.6.33: handle link-down
+  * [mt] releasing of refcounted requests fixed
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Thu, 06 Jan 2011 12:48:01 +0100
+
+etherlab-devel (20110105+2025-1) lucid; urgency=low
+
+  * [mt] replace injection_seq counter with fsm_datagram_queue
+  * [mt] EoE handled by Idle/Operation thread
+  * [mt] --enable-mutex build option; uses rt_mutex instead of semaphores
+  * [mt] fixed potential deadlocks due to calls to wait_event (uses kref refcounting)
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Wed, 05 Jan 2011 13:02:26 +0100
+
+etherlab-devel (20101206+2008-1) lucid; urgency=low
+
+  * [mt] Inplace I/O bug: correct domain tx-size when tx-size of input and output fmmu is different
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Mon, 06 Dec 2010 11:43:46 +0100
+
+etherlab-devel (20101129+2006-1) lucid; urgency=low
+
+  * [mt] merged in changes from sourceforge
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Mon, 29 Nov 2010 08:20:22 +0100
+
+etherlab-devel (20101126+1991-1) lucid; urgency=low
+
+  * [mt] Fixed race when calculating DC offsets
+
+ -- Martin Troxler <martin.troxler@komaxgroup.com>  Fri, 26 Nov 2010 13:59:40 +0100
+
+etherlab-devel (20101122+1989-1) lucid; urgency=low
+
+  * [mt] Use app_start_time for initial DC offset calculation.
+  * [mt] Idle thread considers fsm step prepared by Op-thread.
+  * [mac] Enable parallel (-j2) builds for modules. 
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Mon, 22 Nov 2010 13:45:49 +0100
+
+etherlab-devel (20101116+1986-2) lucid; urgency=low
+
+  * [mt] Add bash completion for ethercat command.
+  * [mac] Use debhelper to install udev rules file.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Thu, 18 Nov 2010 17:03:55 +0100
+
+etherlab-devel (20101116+1986-1) lucid; urgency=low
+
+  * [mt] Use ESC port order (0-3-1-2) for bus topology and DC delay calculation.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Tue, 16 Nov 2010 15:45:24 +0100
+
+etherlab-devel (20101109+1985-10) lucid; urgency=low
+
+  * Etherlab is now a standalone package.
+  * Removed alternatives handling.
+  * libetherlab does not depend on kernel modueles anymore.
+
+ -- Christoph Mathys <christoph.mathys@komaxgroup.com>  Wed, 10 Nov 2010 16:33:57 +0100

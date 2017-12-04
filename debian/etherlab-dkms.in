@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script orders the build of etherlab kernel modules. We must assure
+# that core (ec_master) is built first so the other module can access the
+# masters symbols.
+
+# We're passed the version of the kernel being installed
+inst_kern=$1
+
+# We MUST not output anything to stdout. If we do, this may break other kernel hook
+# scripts if they try to use debconf (for example nvidia-common).
+if [ -x /usr/lib/dkms/common.postinst ]; then
+	pkgState=$(dpkg-query -W -f='${Status}\n' etherlab-config-devel 2> /dev/null || true)
+	if [ x"$pkgState" != x"install ok installed" ] ; then
+		logger -t etherlab-dkms -- "etherlab-config-devel not installed, exiting"
+		exit 0
+	fi
+
+	module_version=#VERSION#
+	for mod in core 8139too e1000 e1000e r8169; do
+		module_name="etherlab_${mod}_devel"
+		# only consider modules added to the dkms tree
+		if [ -d /var/lib/dkms/${module_name}/${module_version} ]; then
+			state=$(dkms status -m $name -v $version -k $(uname -r) | awk -F'[:, ]+' '{print $5}')
+			if [ "x$state" != "xinstalled" ]; then
+				dkms build -m ${module_name} -v ${module_version} -k ${inst_kern} 2>&1 | logger -t etherlab-dkms
+				if [ ${PIPESTATUS[0]} -eq 0 ]; then
+					dkms install -m ${module_name} -v ${module_version} -k ${inst_kern} | logger -t etherlab-dkms
+				else
+					logger -t etherlab-dkms -- "etherlab-dkms: ${module_name} was not built for kernel ${inst_kern}"
+				fi
+			fi
+		fi
+	done
+fi

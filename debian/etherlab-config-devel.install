@@ -1,0 +1,5 @@
+script/sysconfig/ethercat usr/share/doc/etherlab-config-devel/ethercat.sysconfig.ex
+etc/init.d/ethercat etc/init.d/
+debian/ethercat-config etc/init.d/
+debian/etherlab-dkms etc/kernel/postinst.d/
+debian/etherlab-dkms etc/kernel/header_postinst.d/

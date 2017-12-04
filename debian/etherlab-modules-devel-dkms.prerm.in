@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+case $1 in
+  remove|upgrade|deconfigure)
+	rm -f /usr/src/etherlab_core_devel-#VERSION#/symbols/*
+	for mod in core 8139too r8169 e1000 e100;
+	do
+		dkms_name=etherlab_${mod}_devel
+		if [ -n "$(dkms status -m $dkms_name -v #VERSION#)" ]; then
+			dkms remove -m $dkms_name -v #VERSION# --all
+		fi
+	done
+	;;
+esac
+
+#DEBHELPER#
+

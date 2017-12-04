@@ -1,0 +1,13 @@
+usr/src/etherlab_core_devel-#VERSION#/include
+usr/src/etherlab_core_devel-#VERSION#/devices
+usr/src/etherlab_core_devel-#VERSION#/master
+usr/src/etherlab_core_devel-#VERSION#/symbols
+usr/src/etherlab_8139too_devel-#VERSION#/devices
+usr/src/etherlab_8139too_devel-#VERSION#/symbols
+usr/src/etherlab_e1000_devel-#VERSION#/devices/e1000
+usr/src/etherlab_e1000_devel-#VERSION#/symbols
+usr/src/etherlab_e1000e_devel-#VERSION#/devices/e1000e
+usr/src/etherlab_e1000e_devel-#VERSION#/symbols
+usr/src/etherlab_r8169_devel-#VERSION#/devices
+usr/src/etherlab_r8169_devel-#VERSION#/symbols
+

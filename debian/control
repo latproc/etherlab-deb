@@ -1,0 +1,35 @@
+Source: etherlab-devel
+Priority: extra
+Maintainer: Christoph Mathys <christoph.mathys@komaxgroup.com>
+Build-Depends: quilt (>= 0.46-7~), debhelper (>= 7), automake, libtool, linux-headers, libc6, gawk, python, dkms
+Standards-Version: 3.8.4
+Section: libs
+Homepage: http://www.etherlab.org
+XS-X-Vcs-Hg: http://hg.ch10.ch.komax.org/Etherlab
+
+
+Package: libetherlab-dev-devel
+Section: libdevel
+Architecture: any
+Depends: libetherlab-devel (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Header files and static library version of etherlab userspace library (libethercat.a)
+
+Package: libetherlab-devel
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Dynamic userspace library for etherlab (libethercat.so)
+
+Package: etherlab-config-devel
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, udev, adduser, ethtool,
+ libetherlab-devel (= ${binary:Version}), etherlab-modules-devel-dkms (= ${binary:Version})
+Description: Configuration package providing service startup and debconf support.
+
+Package: etherlab-modules-devel-dkms
+Section: electronics
+Architecture: any 
+Depends: dkms (>= 2.1.1.2), debconf, ${misc:Depends}
+Description: Etherlab master and drivers for network interface cards (generic, e100, e1000, 8139too, r8169)
+

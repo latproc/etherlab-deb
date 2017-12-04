@@ -1,0 +1,12 @@
+A short explanation of how to generate a new etherlab debian package. This
+assumes that your debian tools are setup (e.g. ~/.devscripts, debuild and
+the stuff needed by etherlab)
+
+1. Clone Etherlab and DebianPackage repository.
+2. Symlink the folder  DebianPackage/etherlab-deb/debian into Etherlab/debian
+3. cd into Etherlab repository.
+4. call dch -i. If all was right, the changelog should come up with a new
+   entry. Change the version on top to date+revision-1 of the branch tip.
+5. run 'debuild -b -us -uc', then test the package installation with 
+   'sudo debi etherlab-devel_DATE+REV-1_amd64.changes'.
+

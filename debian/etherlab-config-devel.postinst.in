@@ -1,0 +1,139 @@
+#!/bin/sh -e
+
+# Sets up a config for etherlab.
+
+. /usr/share/debconf/confmodule
+
+setup_sysconfig_ethercat()
+{
+	local eth=$1
+	local ethtype=$2
+	local ethmac=$3
+	local conffile=/etc/sysconfig/ethercat
+	if [ ! -d /etc/sysconfig ]; then
+		mkdir -p /etc/sysconfig
+		chmod 755 /etc/sysconfig
+		chown root:root /etc/sysconfig
+	fi
+	echo "setup ethercat master: use $eth[$ethmac] with $ethtype driver"
+	echo "# Automatically generated from etherlab-config maintainer script" > $conffile
+	echo "# Changes to this file will be lost when package is reconfigured." >> $conffile
+	echo "MASTER0_DEVICE=\"$ethmac\"" >> $conffile
+	echo "DEVICE_MODULES=\"$ethtype\"" >> $conffile
+}
+
+dkms_module_setup()
+{
+	# We intentionally omit e100 here to get a bit more speed. They are not used anyway...
+	# They will still be shown in debconf.
+	echo "Checking if etherlab modules need to be removed"
+	# This variable will contain all modules that need to have postinst called after the following loop.
+	callpostinst="core 8139too e1000 e1000e r8169"
+	for mod in core 8139too e1000 e1000e r8169; do
+		common_start="etherlab_${mod}"
+		# "encode" dkms' output so we can use a for loop. 
+		# Take care to not mess up e100, e1000, e1000e. For this reason, SUFFIX MUST NOT start with a '0' (zero) or e.
+		# For each kernel the module is installed to, a new line is created in dkms output, so use uniq to remove
+		# all instances at once
+		for item in $(dkms status | egrep "$common_start[^0e]" | awk -F'[:, ]+' '{print $1"/"$2}' | uniq); do
+			name=$(echo $item | awk -F'/' '{print $1}')
+			version=$(echo $item | awk -F'/' '{print $2}')
+			if [ "$name" = "${common_start}_devel" -a "$version" = "#VERSION#" ]; then
+				# our module is added to the tree, see if it is installed
+				state=$(dkms status -m $name -v $version -k $(uname -r) | awk -F'[:, ]+' '{print $5}')
+				if [ "x$state" = "xinstalled" ]; then
+					# our module is added and installed for the current kernel, don't call
+					# common.postinst for it
+					callpostinst=$(echo $callpostinst | sed -e "s/$mod//g")
+					echo "Module '$name' with version '$version' is already installed"
+				fi
+			else
+				dkms remove -q -m $name -v $version --all
+			fi
+		done
+	done
+
+	for mod in $callpostinst; do
+		# see /usr/share/debhelper/autoscripts/postinst-dkms
+		# etherlab_mod and etherlab-mod-dkms is not by accident with a different word delimiter.
+		# dkms wants underlines, APT forbids underlines for package names
+		mod_name=etherlab_${mod}_devel
+		echo "Invoking dkms/common.postinst $mod_name #VERSION#" 
+		/usr/lib/dkms/common.postinst "$mod_name" "#VERSION#" /does/not/exist/ > /dev/null 2>&1 || true
+	done
+}
+
+case $1 in
+  configure|abort-upgrade|abord-remove|abort-deconfigure)
+	if ! getent group realtime > /dev/null 2>&1 ; then
+		addgroup --system realtime
+	fi
+
+	# reload and trigger udev. Triggering should not even be necessary,
+	# because the module will be reloaded, reapplying udev rules anyway.
+	udevadm control --reload-rules
+	udevadm trigger --action=change
+
+	# remove all manually installed modules from every kernel on the system
+	rm -rf /lib/modules/*/ethercat
+	# Remove files from manual etherlab installation
+	rm -f /etc/ld.so.conf.d/libetherlab-manual.so.conf
+	ldconfig.real # forcibly update ld.so cache NOW (ldconfig is triggerized)
+
+	rm -rf /opt/etherlab/
+	# If we use the packaged variant of etherlab, the packages preinst-script
+	# will already have done that. If we use the manually installed version,
+	# shut it down here.
+	if lsmod | grep -q ec_master && [ -x /etc/init.d/ethercat ]; then
+		invoke-rc.d --quiet ethercat stop || true
+	fi
+
+	dkms_module_setup
+
+	# XXX Rename ethercat config file and call script that MIGHT create
+	# a new config file. If it does, remove renamed file. If the script
+	# does not create a config file, put the original config file back
+	# in place.
+	if [ -e /etc/sysconfig/ethercat ]; then
+		mv /etc/sysconfig/ethercat /etc/sysconfig/ethercat.tmp
+	fi
+	invoke-rc.d --quiet ethercat-config start
+
+	if [ -e /etc/sysconfig/ethercat ]; then
+		rm -f /etc/sysconfig/ethercat.tmp
+	else
+		test -e /etc/sysconfig/ethercat.tmp && mv /etc/sysconfig/ethercat.tmp /etc/sysconfig/ethercat
+
+		# if 'ethercat-config' does not generate a new ethercat configuration
+		# file, we try to do this below according to user specs.
+		db_get shared/etherlab-nic-to-use
+		eth=$RET
+		db_get shared/etherlab-driver-to-use
+		driver=$RET
+		ethmac=$(ifconfig $eth | awk '/HWaddr/ { print $5 }')
+		if [ "$?" = "0" ]; then
+			setup_sysconfig_ethercat $eth $driver $ethmac
+		else
+			echo "ERROR: Unable to find eth device \"$eth\""
+		fi
+	fi
+	;;
+esac
+
+on_error() {
+	# It is not a hard error if etherlab refuses to start
+	echo "Ingoring error from init script"
+	return 0
+}
+
+#DEBHELPER#
+
+if [ -e /etc/sv/kxusr/supervise/ok ] ; then
+	# If we think we are in machine environment, restart kxusr which has previously been
+	# stopped by our prerm script.
+	# EtherCATController will make it impossible for the maintainer-script of etherlab
+	# to unload the kernel module. So we stop the service here if we think we are in
+	# machine environment.
+	sv -v up kxusr
+fi
+

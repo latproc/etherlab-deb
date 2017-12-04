@@ -1,0 +1,41 @@
+#!/bin/sh -e
+
+remove_dkms_modules()
+{
+	for mod in core 8139too r8169 e1000 e1000e;
+	do
+		dkms_name=etherlab_${mod}_devel
+		if [ -n "$(dkms status -m $dkms_name -v #VERSION#)" ]; then
+			dkms remove -m $dkms_name -v #VERSION# --all
+		fi
+	done
+}
+
+case $1 in
+  remove|deconfigure)
+	remove_dkms_modules
+	;;
+  upgrade)
+	# try to avoid removal of dkms modules if someone calls dpkg-reconfigure
+	# on the version which is already active.
+	if [ "$2" != "#VERSION#" ]; then
+		remove_dkms_modules
+	fi
+	;;
+esac
+
+if [ -e /etc/sv/kxusr/supervise/ok ] ; then
+	# EtherCATController will make it impossible for the maintainer-script of etherlab
+	# to unload the kernel module. So we stop the service here if we think we are in
+	# machine environment.
+	sv -v -w 10 down kxusr
+fi
+
+on_error() {
+	# It is not a hard error if etherlab refuses to start
+	echo "Ingoring error from init script"
+	return 0
+}
+
+#DEBHELPER#
+

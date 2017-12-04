@@ -1,0 +1,11 @@
+config.h usr/src/etherlab_core_devel-#VERSION#/
+master/* usr/src/etherlab_core_devel-#VERSION#/master
+devices/generic.* usr/src/etherlab_core_devel-#VERSION#/devices
+devices/ecdev.h usr/src/etherlab_core_devel-#VERSION#/devices
+globals.h usr/src/etherlab_core_devel-#VERSION#
+revision usr/src/etherlab_core_devel-#VERSION#
+debian/dkms/core/dkms.conf usr/src/etherlab_core_devel-#VERSION#
+debian/dkms/backup-symbols.sh usr/src/etherlab_core_devel-#VERSION#/
+debian/dkms/core/Kbuild usr/src/etherlab_core_devel-#VERSION#/
+debian/dkms/core/generic/Kbuild usr/src/etherlab_core_devel-#VERSION#/devices
+include/*.h usr/src/etherlab_core_devel-#VERSION#/include

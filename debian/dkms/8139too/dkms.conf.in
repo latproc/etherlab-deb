@@ -1,0 +1,10 @@
+PACKAGE_NAME="etherlab_8139too_devel"
+PACKAGE_VERSION="#VERSION#"
+BUILD_EXCLUSIVE_KERNEL="2\.6\.(13|17|18|19|22|23|24|25|26|27|28|29|31|32|33|34|35|36|37)"
+PRE_BUILD="get-symbols.sh $kernelver $dkms_tree $module_version $module _devel"
+MAKE[0]="make -j2 -C $kernel_source_dir M=$dkms_tree/$module/$module_version/build"
+
+DEST_MODULE_LOCATION[0]="/extra/ethercat/devices/"
+BUILT_MODULE_NAME[0]="ec_8139too"
+BUILT_MODULE_LOCATION[0]="devices/"
+

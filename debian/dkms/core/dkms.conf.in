@@ -1,0 +1,13 @@
+PACKAGE_NAME="etherlab_core_devel"
+PACKAGE_VERSION="#VERSION#"
+POST_BUILD="backup-symbols.sh $kernelver $dkms_tree/$module/$module_version/build $dkms_tree/$module/$module_version/source/symbols/"
+MAKE[0]="make -j2 -C $kernel_source_dir M=$dkms_tree/$module/$module_version/build"
+
+DEST_MODULE_LOCATION[0]="/extra/ethercat/master"
+BUILT_MODULE_NAME[0]="ec_master"
+BUILT_MODULE_LOCATION[0]="master/"
+
+DEST_MODULE_LOCATION[1]="/extra/ethercat/devices"
+BUILT_MODULE_NAME[1]="ec_generic"
+BUILT_MODULE_LOCATION[1]="devices/"
+

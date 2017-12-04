@@ -1,0 +1,53 @@
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -728,6 +728,10 @@
+ distclean: distclean-recursive
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+ 	-rm -f Makefile
++	-rm -f devices/Makefile
++	-rm -f examples/Makefile
++	-rm -f master/Makefile
++
+ distclean-am: clean-am distclean-generic distclean-hdr \
+ 	distclean-libtool distclean-tags
+ 
+@@ -820,9 +824,6 @@
+ 	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" \
+ 		INSTALL_MOD_DIR="$(INSTALL_MOD_DIR)" modules_install
+ 
+-clean-local:
+-	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" clean
+-
+ mydist:
+ 	hg log --style=changelog $(srcdir) > ChangeLog
+ 	@REV=`hg id -i $(srcdir)` && \
+--- a/devices/Makefile.in
++++ b/devices/Makefile.in
+@@ -589,7 +589,6 @@
+ clean-am: clean-generic clean-libtool clean-local mostlyclean-am
+ 
+ distclean: distclean-recursive
+-	-rm -f Makefile
+ distclean-am: clean-am distclean-generic distclean-tags
+ 
+ dvi: dvi-recursive
+--- a/examples/Makefile.in
++++ b/examples/Makefile.in
+@@ -545,7 +545,6 @@
+ clean-am: clean-generic clean-libtool mostlyclean-am
+ 
+ distclean: distclean-recursive
+-	-rm -f Makefile
+ distclean-am: clean-am distclean-generic distclean-tags
+ 
+ dvi: dvi-recursive
+--- a/master/Makefile.in
++++ b/master/Makefile.in
+@@ -425,7 +425,6 @@
+ clean-am: clean-generic clean-libtool clean-local mostlyclean-am
+ 
+ distclean: distclean-am
+-	-rm -f Makefile
+ distclean-am: clean-am distclean-generic distclean-tags
+ 
+ dvi: dvi-am
